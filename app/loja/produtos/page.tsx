@@ -31,14 +31,14 @@ function ProductCard({ product }: { product: any }) {
       </div>
       <CardContent className="p-5">
         <h3 className="font-serif font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-          {product.name}
+          {product.nome}
         </h3>
         <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-          {product.description}
+          {product.descricao}
         </p>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-lg font-bold text-primary">
-            R$ {(product.base_price || 0).toFixed(2)}
+            R$ {(product.precoVenda || 0).toFixed(2)}
           </span>
           <Button size="sm" onClick={() => toast.success('Adicionado ao carrinho!')}>
             <ShoppingCart className="size-4" />

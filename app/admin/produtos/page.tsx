@@ -39,10 +39,10 @@ export default function ProdutosPage() {
   }, [error])
 
   const filteredProducts = products.filter((product) => {
-    const matchSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase())
     const matchStatus = statusFilter === 'all' || 
-      (statusFilter === 'ativo' && product.is_active) ||
-      (statusFilter === 'inativo' && !product.is_active)
+      (statusFilter === 'ativo' && product.ativo) ||
+      (statusFilter === 'inativo' && !product.ativo)
     return matchSearch && matchStatus
   })
 
