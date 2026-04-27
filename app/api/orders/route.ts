@@ -1,57 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createOrderItem, createOrder, getOrdersByStatus } from '@/lib/supabase/orders'
-import { validateRequest, validationSchemas } from '@/lib/validations'
+import type { Pedido } from '@/lib/types'
+
+let orders: Map<string, Pedido> = new Map()
+let orderCounter = 1
+
+export async function GET(req: NextRequest) {
+  const status = req.nextUrl.searchParams.get('status')
+  let data = Array.from(orders.values())
+  
+  if (status) {
+    data = data.filter(o => o.status === status)
+  }
+  
+  return NextResponse.json(data)
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     
-    // Validar entrada
-    const validation = await validateRequest(validationSchemas.order, body)
-
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error, code: 'VALIDATION_ERROR' },
-        { status: 400 }
-      )
+    const numero = String(orderCounter++).padStart(5, '0')
+    const id = `ped-${numero}`
+    const pedido: Pedido = {
+      id,
+      numero,
+      clienteId: body.clienteId,
+      itens: body.itens || [],
+      subtotal: parseFloat(body.subtotal) || 0,
+      desconto: parseFloat(body.desconto) || 0,
+      taxaEntrega: parseFloat(body.taxaEntrega) || 0,
+      total: parseFloat(body.total) || 0,
+      status: 'aguardando_pagamento',
+      prioridade: body.prioridade || 'normal',
+      pago: false,
+      observacoes: body.observacoes,
+      criadoEm: new Date(),
+      atualizadoEm: new Date(),
     }
-
-    const order = await createOrder(validation.data)
-    return NextResponse.json(order, { status: 201 })
+    
+    orders.set(id, pedido)
+    return NextResponse.json(pedido, { status: 201 })
   } catch (error) {
-    console.error('Orders POST error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create order', code: 'ORDER_CREATE_FAILED' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro ao criar pedido' }, { status: 400 })
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
-    const status = req.nextUrl.searchParams.get('status')
-    
-    // Validar status se fornecido
-    const validStatuses = ['pending', 'processing', 'completed', 'cancelled']
-    if (status && !validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: 'Invalid status parameter', code: 'INVALID_STATUS' },
-        { status: 400 }
-      )
+    const body = await req.json()
+    const { id, status, ...updates } = body
+
+    if (!id || !orders.has(id)) {
+      return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
     }
 
-    if (status) {
-      const orders = await getOrdersByStatus(status)
-      return NextResponse.json(orders)
+    const pedido = orders.get(id)!
+    const updated: Pedido = {
+      ...pedido,
+      ...updates,
+      status: status || pedido.status,
+      atualizadoEm: new Date(),
     }
-    
-    return NextResponse.json([])
+
+    orders.set(id, updated)
+    return NextResponse.json(updated)
   } catch (error) {
-    console.error('Orders GET error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch orders', code: 'ORDER_FETCH_FAILED' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Erro ao atualizar pedido' }, { status: 400 })
   }
+}
+
+export async function DELETE(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id')
+  
+  if (!id || !orders.has(id)) {
+    return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
+  }
+
+  orders.delete(id)
+  return NextResponse.json({ success: true })
 }
 
