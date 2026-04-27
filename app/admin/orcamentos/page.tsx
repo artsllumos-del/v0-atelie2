@@ -262,7 +262,7 @@ function OrcamentoRow({ orcamento }: { orcamento: Orcamento }) {
   )
 }
 
-function OrcamentosCards() {
+function OrcamentosCards({ orcamentos }: { orcamentos: any[] }) {
   const totalOrcamentos = orcamentos.length
   const rascunhos = orcamentos.filter((o) => o.status === 'rascunho').length
   const enviados = orcamentos.filter((o) => o.status === 'enviado').length
@@ -347,7 +347,7 @@ export default function OrcamentosPage() {
       </div>
 
       {/* Cards */}
-      <OrcamentosCards />
+        <OrcamentosCards orcamentos={quotes} />
 
       {/* Tabela */}
       <Card>

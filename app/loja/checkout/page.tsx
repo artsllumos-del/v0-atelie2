@@ -215,14 +215,14 @@ function EtapaConfirmacao() {
         Você receberá um e-mail com os detalhes do pedido e informações de rastreamento.
       </p>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-        <Button asChild>
-          <Link href="/loja/conta/pedidos">Acompanhar Pedido</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/loja">Continuar Comprando</Link>
-        </Button>
-      </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                <Button asChild>
+                  <Link href="/loja/conta">Acompanhar Pedido</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/loja">Continuar Comprando</Link>
+                </Button>
+              </div>
     </div>
   )
 }

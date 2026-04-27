@@ -51,7 +51,18 @@ function ProductCard({ product }: { product: any }) {
 
 export default function ProdutosPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: products = [], isLoading } = useSWR('products-page', getProducts)
+  const { data: products = [], isLoading, error } = useSWR(
+    'products-page',
+    async () => {
+      try {
+        const result = await getProducts()
+        return result
+      } catch (err) {
+        console.error('Erro ao buscar produtos:', err)
+        return []
+      }
+    }
+  )
 
   const filteredProducts = products
     .filter((p: any) => p.is_active && p.name.toLowerCase().includes(searchTerm.toLowerCase()))

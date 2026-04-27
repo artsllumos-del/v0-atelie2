@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   Package,
@@ -36,6 +36,8 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 interface NavItem {
   href: string
@@ -137,6 +139,19 @@ function SidebarContent({ collapsed = false }: { collapsed?: boolean }) {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      toast.success('Desconectado com sucesso')
+      router.push('/auth/login')
+    } catch (error) {
+      toast.error('Erro ao desconectar')
+      console.error('Logout error:', error)
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -236,7 +251,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                   Configurações
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                   <LogOut className="mr-2 size-4" />
                   Sair
                 </DropdownMenuItem>

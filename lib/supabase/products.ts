@@ -1,7 +1,8 @@
 // Funções para gerenciar produtos no Supabase
-import { supabase } from './client'
+import { createClient } from './client'
 
 export async function getProducts() {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('products')
     .select('*')
@@ -11,7 +12,20 @@ export async function getProducts() {
   return data || []
 }
 
+export async function getProductById(id: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
 export async function createProduct(product: any) {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('products')
     .insert([{
@@ -31,6 +45,7 @@ export async function createProduct(product: any) {
 }
 
 export async function updateProduct(id: string, product: any) {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('products')
     .update({
@@ -51,6 +66,7 @@ export async function updateProduct(id: string, product: any) {
 }
 
 export async function deleteProduct(id: string) {
+  const supabase = createClient()
   const { error } = await supabase
     .from('products')
     .delete()
