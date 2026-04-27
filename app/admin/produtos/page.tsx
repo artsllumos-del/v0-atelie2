@@ -1,131 +1,92 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import useSWR from 'swr'
-import {
-  Plus,
-  Search,
-  Package,
-  Loader2,
-  TrendingUp,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Search, Trash2, Edit2, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { toast } from 'sonner'
-import { getProducts } from '@/lib/supabase/products'
-import { ProductFormDialog } from '@/components/admin/product-form-dialog'
-import { ProductTable } from '@/components/admin/product-table'
+import { useProducts } from '@/lib/hooks/useProducts'
+import type { Product } from '@/lib/types'
 
 export default function ProdutosPage() {
+  const { products, isLoading, deleteProduct, refetch } = useProducts()
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [formDialogOpen, setFormDialogOpen] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [formData, setFormData] = useState<Partial<Product>>({})
+  const [showForm, setShowForm] = useState(false)
 
-  const { data: products = [], isLoading, error, mutate } = useSWR('products', getProducts)
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  useEffect(() => {
-    if (error) {
-      toast.error('Erro ao carregar produtos')
+  const handleDelete = async (id: string) => {
+    if (confirm('Tem certeza que deseja deletar este produto?')) {
+      const success = await deleteProduct(id)
+      if (success) {
+        toast.success('Produto deletado com sucesso')
+      } else {
+        toast.error('Erro ao deletar produto')
+      }
     }
-  }, [error])
-
-  const filteredProducts = products.filter((product) => {
-    const matchSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchStatus = statusFilter === 'all' || 
-      (statusFilter === 'ativo' && product.ativo) ||
-      (statusFilter === 'inativo' && !product.ativo)
-    return matchSearch && matchStatus
-  })
-
-  const handleEdit = (product: any) => {
-    setSelectedProduct(product)
-    setFormDialogOpen(true)
   }
 
-  const handleCloseDialog = () => {
-    setFormDialogOpen(false)
-    setSelectedProduct(null)
+  const handleEdit = (product: Product) => {
+    setEditingId(product.id)
+    setFormData(product)
+    setShowForm(true)
   }
 
-  const handleFormSuccess = () => {
-    mutate()
+  const handleNewProduct = () => {
+    setEditingId(null)
+    setFormData({
+      name: '',
+      description: '',
+      category: 'terco',
+      base_price: 0,
+      sale_price: 0,
+      production_time_minutes: 60,
+      is_customizable: true,
+      is_active: true,
+    })
+    setShowForm(true)
   }
 
   const totalProducts = products.length
-  const activeProducts = products.filter((p: any) => p.is_active).length
-  const avgProductionTime = Math.round(
-    products.reduce((acc: number, p: any) => acc + (p.production_time_minutes || 0), 0) / Math.max(totalProducts, 1)
-  )
-  const totalBasePrice = products.reduce((acc: number, p: any) => acc + (p.base_price || 0), 0)
+  const activeProducts = products.filter((p) => p.is_active).length
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-foreground">Produtos</h1>
-          <p className="text-muted-foreground">Gerencie seu catálogo de terços e produtos</p>
+          <h1 className="font-serif text-2xl font-semibold">Produtos</h1>
+          <p className="text-sm text-muted-foreground">Gerencie seu catálogo de terços</p>
         </div>
-        <Button onClick={() => { setSelectedProduct(null); setFormDialogOpen(true) }}>
-          <Plus className="mr-2 size-4" />
+        <Button onClick={handleNewProduct} className="w-full sm:w-auto">
+          <Plus className="mr-2 h-4 w-4" />
           Novo Produto
         </Button>
       </div>
 
       {/* Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Produtos</CardTitle>
-            <Package className="size-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">produtos cadastrados</p>
+            <div className="text-3xl font-bold">{totalProducts}</div>
+            <p className="text-xs text-muted-foreground">cadastrados</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Produtos Ativos</CardTitle>
-            <TrendingUp className="size-4 text-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Ativos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">{activeProducts}</div>
-            <p className="text-xs text-muted-foreground">disponíveis para venda</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tempo Médio</CardTitle>
-            <Package className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{avgProductionTime}</div>
-            <p className="text-xs text-muted-foreground">minutos de produção</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Receita Base</CardTitle>
-            <Package className="size-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              R$ {totalBasePrice.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">soma dos preços base</p>
+            <div className="text-3xl font-bold text-green-600">{activeProducts}</div>
+            <p className="text-xs text-muted-foreground">disponíveis</p>
           </CardContent>
         </Card>
       </div>
@@ -135,53 +96,63 @@ export default function ProdutosPage() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="font-serif">Produtos</CardTitle>
+              <CardTitle>Produtos</CardTitle>
               <CardDescription>Lista de todos os produtos cadastrados</CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar produto..."
-                  className="w-full pl-9 sm:w-64"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="ativo">Ativos</SelectItem>
-                  <SelectItem value="inativo">Inativos</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar..."
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground">Nenhum produto encontrado</div>
           ) : (
-            <ProductTable 
-              products={filteredProducts} 
-              onEdit={handleEdit}
-              onRefresh={() => mutate()}
-            />
+            <div className="space-y-2">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="flex items-center justify-between gap-4 rounded-lg border p-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium truncate">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{product.description}</p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="text-gray-600">R$ {product.sale_price.toFixed(2)}</span>
+                      {!product.is_active && <span className="rounded bg-red-100 px-2 py-1 text-red-800">Inativo</span>}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(product)}
+                      className="h-9 w-9 p-0"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(product.id)}
+                      className="h-9 w-9 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
-
-      <ProductFormDialog 
-        open={formDialogOpen}
-        onOpenChange={handleCloseDialog}
-        product={selectedProduct}
-        onSuccess={handleFormSuccess}
-      />
     </div>
   )
 }
