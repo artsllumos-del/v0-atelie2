@@ -12,10 +12,11 @@ import type {
 } from './types'
 
 // ===========================================
-// DADOS INICIAIS - VAZIO PARA DADOS DO USUÁRIO
+// DADOS MOCK PARA DESENVOLVIMENTO
 // ===========================================
 
-// Configuração de Precificação padrão
+// --- CONFIGURAÇÃO DE PRECIFICAÇÃO ---
+
 export const configuracaoPrecificacao: ConfiguracaoPrecificacao = {
   valorHoraTrabalho: 30,
   margemMinima: 30,
@@ -30,16 +31,123 @@ export const configuracaoPrecificacao: ConfiguracaoPrecificacao = {
   taxaMarketplace: 12,
 }
 
-// Inicializar com arrays vazios
-export const materiais: Material[] = []
-export const produtos: Produto[] = []
-export const clientes: Cliente[] = []
-export const pedidos: Pedido[] = []
-export const orcamentos: Orcamento[] = []
-export const transacoes: Transacao[] = []
-export const itensProducao: ItemProducao[] = []
-export const alertas: AlertaSistema[] = []
+// --- MATERIAIS ---
 
+export const materiais: Material[] = [
+  {
+    id: 'mat-001',
+    nome: 'Contas de Cristal 6mm - Transparente',
+    descricao: 'Contas de cristal lapidado, alta qualidade',
+    categoria: 'contas',
+    unidadeCompra: 'gramas',
+    unidadeUso: 'unidade',
+    pesoCompra: 80,
+    quantidadeEstimada: 60,
+    relacaoConversao: 0.75,
+    margemErro: 5,
+    quantidadeDisponivel: 450,
+    estoqueMinimo: 100,
+    precoCompra: 25.0,
+    custoUnitario: 0.42,
+    fornecedor: 'Cristais Silva',
+    criadoEm: new Date('2024-01-15'),
+    atualizadoEm: new Date('2024-03-10'),
+  },
+  {
+    id: 'mat-002',
+    nome: 'Contas de Cristal 8mm - Azul Royal',
+    descricao: 'Contas de cristal lapidado azul royal',
+    categoria: 'contas',
+    unidadeCompra: 'gramas',
+    unidadeUso: 'unidade',
+    pesoCompra: 100,
+    quantidadeEstimada: 45,
+    relacaoConversao: 0.45,
+    margemErro: 5,
+    quantidadeDisponivel: 180,
+    estoqueMinimo: 80,
+    precoCompra: 32.0,
+    custoUnitario: 0.71,
+    fornecedor: 'Cristais Silva',
+    criadoEm: new Date('2024-01-15'),
+    atualizadoEm: new Date('2024-03-10'),
+  },
+  {
+    id: 'mat-003',
+    nome: 'Contas de Pérola 6mm - Branca',
+    descricao: 'Pérolas sintéticas de alta qualidade',
+    categoria: 'contas',
+    unidadeCompra: 'pacote',
+    unidadeUso: 'unidade',
+    quantidadeEstimada: 100,
+    quantidadeDisponivel: 320,
+    estoqueMinimo: 150,
+    precoCompra: 18.0,
+    custoUnitario: 0.18,
+    fornecedor: 'Pérolas Brasil',
+    criadoEm: new Date('2024-02-01'),
+    atualizadoEm: new Date('2024-03-08'),
+  },
+  {
+    id: 'mat-004',
+    nome: 'Crucifixo Ouro Velho - Médio',
+    descricao: 'Crucifixo em metal com acabamento ouro velho',
+    categoria: 'crucifixos',
+    unidadeCompra: 'unidade',
+    unidadeUso: 'unidade',
+    quantidadeDisponivel: 45,
+    estoqueMinimo: 20,
+    precoCompra: 4.5,
+    custoUnitario: 4.5,
+    fornecedor: 'Metais São Paulo',
+    criadoEm: new Date('2024-01-20'),
+    atualizadoEm: new Date('2024-03-05'),
+  },
+  {
+    id: 'mat-005',
+    nome: 'Crucifixo Prata - Grande',
+    descricao: 'Crucifixo em metal com acabamento prata',
+    categoria: 'crucifixos',
+    unidadeCompra: 'unidade',
+    unidadeUso: 'unidade',
+    quantidadeDisponivel: 28,
+    estoqueMinimo: 15,
+    precoCompra: 6.0,
+    custoUnitario: 6.0,
+    fornecedor: 'Metais São Paulo',
+    criadoEm: new Date('2024-01-20'),
+    atualizadoEm: new Date('2024-03-05'),
+  },
+  {
+    id: 'mat-006',
+    nome: 'Entremeio Nossa Senhora - Ouro Velho',
+    descricao: 'Medalha entremeio com imagem de Nossa Senhora',
+    categoria: 'entremeios',
+    unidadeCompra: 'unidade',
+    unidadeUso: 'unidade',
+    quantidadeDisponivel: 52,
+    estoqueMinimo: 25,
+    precoCompra: 3.5,
+    custoUnitario: 3.5,
+    fornecedor: 'Metais São Paulo',
+    criadoEm: new Date('2024-01-20'),
+    atualizadoEm: new Date('2024-03-05'),
+  },
+  {
+    id: 'mat-007',
+    nome: 'Entremeio Divino Espírito Santo - Prata',
+    descricao: 'Medalha entremeio com imagem do Divino',
+    categoria: 'entremeios',
+    unidadeCompra: 'unidade',
+    unidadeUso: 'unidade',
+    quantidadeDisponivel: 18,
+    estoqueMinimo: 20,
+    precoCompra: 3.8,
+    custoUnitario: 3.8,
+    fornecedor: 'Metais São Paulo',
+    criadoEm: new Date('2024-01-20'),
+    atualizadoEm: new Date('2024-03-05'),
+  },
   {
     id: 'mat-008',
     nome: 'Fio Encerado 1mm - Preto',
