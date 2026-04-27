@@ -1,106 +1,76 @@
+// Funções para gerenciar produtos no Supabase
 import { createClient } from './client'
-import type { Product } from '../types'
 
-export async function getProducts(): Promise<Product[]> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) {
-      console.error('Erro ao buscar produtos:', error)
-      return []
-    }
-    
-    return data || []
-  } catch (err) {
-    console.error('Erro ao buscar produtos:', err)
-    return []
-  }
+export async function getProducts() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single()
-    
-    if (error) {
-      console.error('Erro ao buscar produto:', error)
-      return null
-    }
-    
-    return data
-  } catch (err) {
-    console.error('Erro ao buscar produto:', err)
-    return null
-  }
+export async function getProductById(id: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) throw error
+  return data
 }
 
-export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product | null> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('products')
-      .insert([product])
-      .select()
-      .single()
-    
-    if (error) {
-      console.error('Erro ao criar produto:', error)
-      return null
-    }
-    
-    return data
-  } catch (err) {
-    console.error('Erro ao criar produto:', err)
-    return null
-  }
+export async function createProduct(product: any) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('products')
+    .insert([{
+      name: product.name,
+      description: product.description,
+      base_price: product.base_price,
+      sale_price: product.sale_price || product.base_price,
+      production_time_minutes: product.production_time_minutes,
+      is_customizable: product.is_customizable,
+      is_active: product.is_active,
+      created_at: new Date().toISOString(),
+    }])
+    .select()
+
+  if (error) throw error
+  return data?.[0]
 }
 
-export async function updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
-  try {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('products')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-    
-    if (error) {
-      console.error('Erro ao atualizar produto:', error)
-      return null
-    }
-    
-    return data
-  } catch (err) {
-    console.error('Erro ao atualizar produto:', err)
-    return null
-  }
+export async function updateProduct(id: string, product: any) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('products')
+    .update({
+      name: product.name,
+      description: product.description,
+      base_price: product.base_price,
+      sale_price: product.sale_price || product.base_price,
+      production_time_minutes: product.production_time_minutes,
+      is_customizable: product.is_customizable,
+      is_active: product.is_active,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+
+  if (error) throw error
+  return data?.[0]
 }
 
-export async function deleteProduct(id: string): Promise<boolean> {
-  try {
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id)
-    
-    if (error) {
-      console.error('Erro ao deletar produto:', error)
-      return false
-    }
-    
-    return true
-  } catch (err) {
-    console.error('Erro ao deletar produto:', err)
-    return false
-  }
+export async function deleteProduct(id: string) {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
 }
